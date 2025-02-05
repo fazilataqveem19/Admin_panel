@@ -2,16 +2,39 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bar, Line, Pie } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement, ArcElement } from "chart.js";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  PointElement,
+  ArcElement,
+  ChartOptions,
+} from "chart.js";
 
-// Register the necessary components for the chart
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement, ArcElement);
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  PointElement,
+  ArcElement
+);
 
 const AdminDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("products");
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Sample data for Bar chart (Sales Overview)
+  // Sample Data
   const salesData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
@@ -25,7 +48,6 @@ const AdminDashboard = () => {
     ],
   };
 
-  // Sample data for Line chart (Order Status)
   const orderData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
@@ -39,22 +61,29 @@ const AdminDashboard = () => {
     ],
   };
 
-  // Sample data for Pie chart (User Growth)
   const userData = {
     labels: ["Active", "Inactive", "Pending"],
     datasets: [
       {
         label: "User Growth",
         data: [300, 100, 50],
-        backgroundColor: ["rgba(75, 192, 192, 0.2)", "rgba(153, 102, 255, 0.2)", "rgba(255, 159, 64, 0.2)"],
-        borderColor: ["rgba(75, 192, 192, 1)", "rgba(153, 102, 255, 1)", "rgba(255, 159, 64, 1)"],
+        backgroundColor: [
+          "rgba(75, 192, 192, 0.2)",
+          "rgba(153, 102, 255, 0.2)",
+          "rgba(255, 159, 64, 0.2)",
+        ],
+        borderColor: [
+          "rgba(75, 192, 192, 1)",
+          "rgba(153, 102, 255, 1)",
+          "rgba(255, 159, 64, 1)",
+        ],
         borderWidth: 1,
       },
     ],
   };
 
-  // Chart options for all charts
-  const chartOptions = {
+  // Chart Options for different chart types
+  const barChartOptions: ChartOptions<"bar"> = {
     responsive: true,
     plugins: {
       title: {
@@ -62,11 +91,55 @@ const AdminDashboard = () => {
         text: "Overview",
         font: {
           size: 20,
-          weight: "bold" as const,
+          weight: "bold",
         },
       },
       legend: {
-        position: "top" as const,
+        position: "top",
+        labels: {
+          font: {
+            size: 14,
+          },
+        },
+      },
+    },
+  };
+
+  const lineChartOptions: ChartOptions<"line"> = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: "Orders over Time",
+        font: {
+          size: 20,
+          weight: "bold",
+        },
+      },
+      legend: {
+        position: "top",
+        labels: {
+          font: {
+            size: 14,
+          },
+        },
+      },
+    },
+  };
+
+  const pieChartOptions: ChartOptions<"pie"> = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: "User Growth",
+        font: {
+          size: 20,
+          weight: "bold",
+        },
+      },
+      legend: {
+        position: "top",
         labels: {
           font: {
             size: 14,
@@ -77,43 +150,36 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    // Perform any necessary logout logic here (e.g., clearing user session)
-    // Then redirect to the signin page
     router.push("/signin");
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="min-h-screen bg-black text-white flex flex-col md:flex-row">
+      {/* Mobile Sidebar Toggle */}
+      <button
+        className="md:hidden bg-black p-3 text-white"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        ☰ 
+      </button>
+
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white min-h-screen p-6">
+      <aside
+        className={`w-64 bg-gray-900 p-6 md:block ${isSidebarOpen ? "block" : "hidden"} md:min-h-screen`}
+      >
         <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
         <ul className="space-y-4">
+          {["products", "orders", "users", "categories"].map((tab) => (
+            <li
+              key={tab}
+              className="cursor-pointer hover:bg-gray-800 p-3 rounded-lg transition-all"
+              onClick={() => setSelectedTab(tab)}
+            >
+              <span className="font-medium capitalize">Manage {tab}</span>
+            </li>
+          ))}
           <li
-            className="cursor-pointer hover:bg-gray-800 p-3 rounded-lg transition-all ease-in-out"
-            onClick={() => setSelectedTab("products")}
-          >
-            <span className="font-medium">Manage Products</span>
-          </li>
-          <li
-            className="cursor-pointer hover:bg-gray-800 p-3 rounded-lg transition-all ease-in-out"
-            onClick={() => setSelectedTab("orders")}
-          >
-            <span className="font-medium">Manage Orders</span>
-          </li>
-          <li
-            className="cursor-pointer hover:bg-gray-800 p-3 rounded-lg transition-all ease-in-out"
-            onClick={() => setSelectedTab("users")}
-          >
-            <span className="font-medium">Manage Users</span>
-          </li>
-          <li
-            className="cursor-pointer hover:bg-gray-800 p-3 rounded-lg transition-all ease-in-out"
-            onClick={() => setSelectedTab("categories")}
-          >
-            <span className="font-medium">Manage Categories</span>
-          </li>
-          <li
-            className="cursor-pointer hover:bg-red-600 p-3 rounded-lg transition-all ease-in-out mt-6"
+            className="cursor-pointer hover:bg-red-600 p-3 rounded-lg transition-all mt-6"
             onClick={handleLogout}
           >
             <span className="font-medium">Logout</span>
@@ -122,43 +188,19 @@ const AdminDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8">
-        {selectedTab === "products" && (
-          <div>
-            <h2 className="text-3xl font-semibold">Product Management</h2>
-            <div className="bg-white p-6 rounded-lg shadow-xl mt-6">
-              <h3 className="text-2xl font-semibold mb-4">Sales Overview</h3>
-              <Bar data={salesData} options={chartOptions} />
-            </div>
-          </div>
-        )}
-        {selectedTab === "orders" && (
-          <div>
-            <h2 className="text-3xl font-semibold">Order Management</h2>
-            <div className="bg-white p-6 rounded-lg shadow-xl mt-6">
-              <h3 className="text-2xl font-semibold mb-4">Order Status</h3>
-              <Line data={orderData} options={chartOptions} />
-            </div>
-          </div>
-        )}
-        {selectedTab === "users" && (
-          <div>
-            <h2 className="text-3xl font-semibold">User Management</h2>
-            <div className="bg-white p-6 rounded-lg shadow-xl mt-6">
-              <h3 className="text-2xl font-semibold mb-4">User Growth</h3>
-              <Pie data={userData} options={chartOptions} />
-            </div>
-          </div>
-        )}
-        {selectedTab === "categories" && (
-          <div>
-            <h2 className="text-3xl font-semibold">Category Management</h2>
-            <div className="bg-white p-6 rounded-lg shadow-xl mt-6">
-              <h3 className="text-2xl font-semibold mb-4">Category Performance</h3>
-              <Pie data={userData} options={chartOptions} />
-            </div>
-          </div>
-        )}
+      <main className="flex-1 p-4 md:p-8">
+        <h2 className="text-2xl md:text-3xl font-semibold capitalize">
+          {selectedTab} Management
+        </h2>
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-xl mt-4 md:mt-6 overflow-x-auto">
+          <h3 className="text-xl md:text-2xl font-semibold mb-2 md:mb-4">
+            Overview
+          </h3>
+          {selectedTab === "products" && <Bar data={salesData} options={barChartOptions} />}
+          {selectedTab === "orders" && <Line data={orderData} options={lineChartOptions} />}
+          {selectedTab === "users" && <Pie data={userData} options={pieChartOptions} />}
+          {selectedTab === "categories" && <Pie data={userData} options={pieChartOptions} />}
+        </div>
       </main>
     </div>
   );
